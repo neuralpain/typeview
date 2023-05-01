@@ -2,8 +2,32 @@
 
 1. clone repository
 2. run `.\typeview.ps1 path\to\font\repository`
-3. go to `path\to\font\repository`
-4. open index.html
-5. play with fonts
+3. wait for cache and compile
+
+--
+
+Switches:
+
+`-Update` - rebuild font cache (cache will build on first run in selected directory)
+`-AddShortcut` - add a shortcut to the desktop for compiled webview
+`-OpenInBrowser` - open after compile is finished
+
+.\typeview.ps1 path\to\font\repository -Update -AddShortcut -OpenInBrowser
+
+--
+
+Open manually:
+
+1. go to `path\to\font\repository`
+2. open index.html
+3. play with fonts
+
+--
+
+Changelog:
+
+v0.3.0 - add switches
+v0.2.0 - optimization and improvememnts
+v0.1.0 - initial release
 
 neuralpain // 'cause why not?

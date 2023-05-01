@@ -1,10 +1,15 @@
 <#
-  typeview.ps1, Version 0.2
+  typeview.ps1, Version 0.3.0
   Copyright (c) 2023, neuralpain
   View your local typefaces in the browser
 #>
 
-param([Parameter(Mandatory)][string]$Directory, [string]$Update)
+param(
+  [Parameter(Mandatory)] [string] $Directory, 
+  [switch] $Update,
+  [switch] $OpenInBrowser,
+  [switch] $AddShortcut
+)
 
 # if (-not(Test-Path "$Directory\_fontwebview")) { mkdir "$Directory\_fontwebview" }
 
@@ -13,7 +18,7 @@ while (($Directory.Substring($Directory.Length - 1) -eq "\") -or ($Directory.Sub
   $Directory = $Directory.Substring(0, $Directory.Length - 1)
 }
 
-if (-not(Test-Path $Directory)) { Write-Host "typeview: Directory does not exist."; exit }
+if (-not(Test-Path $Directory)) { Write-Host "typeview: " -NoNewline; Write-Host "Directory does not exist." -ForegroundColor DarkRed; exit }
 
 # $FONT_WEBVIEW = "$Directory\_fontwebview" # Re: `Clear-FontCache`
 $FONT_WEBVIEW_INDEX = "$Directory\index.html"
@@ -44,6 +49,10 @@ function Reset-FontStylesheet {
   if (Test-Path $FONT_WEBVIEW_CSS) { Clear-Content $FONT_WEBVIEW_CSS } 
 }
 
+function Get-FontList {
+  return (Get-Content -Path $FONT_LIST)
+}
+
 function Reset-FontCache {
 
   # if (Test-Path $FDIR_LIST) { Clear-Content $FDIR_LIST }
@@ -60,7 +69,7 @@ function Reset-FontCache {
   RemoveQuotesFromPath -File $FONT_LIST
   Write-Host "Done."
   
-  $DIR = (Get-Content -Path $FONT_LIST)
+  $DIR = Get-FontList
   Clear-Content $FONT_LIST
   Write-Host "==> Collecting fonts... " -NoNewline
   foreach ($_path in $DIR) { 
@@ -72,11 +81,11 @@ function Reset-FontCache {
   Write-Host "Done."
 }
 
-if ($Update) { Reset-FontCache }
+if (($Update) -or (-not(Test-Path $FONT_LIST))) { Reset-FontCache }
 
 Write-Host "==> Compiling webview... " -NoNewline
 Reset-FontStylesheet
-$FONT = (Get-Content -Path $FONT_LIST)
+$FONT = Get-FontList
 Copy-Item ".\index.html" $FONT_WEBVIEW_INDEX
 
 foreach ($_font in $FONT) {
@@ -91,6 +100,22 @@ foreach ($_font in $FONT) {
 (Get-Content ".\index_end.html") | 
 Out-File $FONT_WEBVIEW_INDEX -Append -Encoding ascii
 Write-Host "Done."
-Write-Host "`nWebview location: $FONT_WEBVIEW_INDEX`n"
+
+if ($AddShortcut) {
+  Write-Host "==> Creating shortcut... " -NoNewline
+  $WshShell = New-Object -comObject WScript.Shell
+  $Shortcut = $WshShell.CreateShortcut("$Home\Desktop\Open Typeview Font Webview.lnk")
+  $Shortcut.TargetPath = "$FONT_WEBVIEW_INDEX"
+  $Shortcut.Save()
+  Write-Host "Done."
+}
+
+Write-Host "`nWebview location: " -NoNewline; 
+Write-Host "$FONT_WEBVIEW_INDEX`n" -ForegroundColor DarkCyan
+
+if ($OpenInBrowser) {
+  Write-Host "==> Opening in default browser...`n"
+  Start-Process $FONT_WEBVIEW_INDEX
+}
 
 exit
