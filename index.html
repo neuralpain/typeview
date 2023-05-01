@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="fontcache.css">
+
+  <script>
+    function updateFontStyle(font) { document.getElementById("sample-text-display").style.fontFamily = font.value; }
+    function updateFontSize() { document.querySelector('#sample-text-display-slider').addEventListener('input', e => document.querySelector('#sample-text-display').style.fontSize = e.target.value + 'pt'); }
+  </script>
+</head>
+
+<body style="text-align:center;">
+
+  <div class="wrapper">
+    <input style="display: block; width: 30%; height: 32px; margin: 0 auto;" id="sample-text-display-slider" type="range" min="12" max="256" value="48" id="slider" step="1"
+      onchange="updateFontSize()">
+
+    <select name="fontselect" id="input-font" class="input" onchange="updateFontStyle(this);">
