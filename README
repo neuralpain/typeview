@@ -1,1 +1,9 @@
 ### typeview — Preview typefaces
+
+1. clone repository
+2. run `.\typeview.ps1 path\to\font\repository`
+3. go to `path\to\font\repository`
+4. open index.html
+5. play with fonts
+
+neuralpain // 'cause why not?
