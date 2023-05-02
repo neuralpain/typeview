@@ -1,5 +1,5 @@
 <#
-  typeview.ps1, Version 0.3.0
+  typeview.ps1, Version 0.4.0
   Copyright (c) 2023, neuralpain
   View your local typefaces in the browser
 #>
@@ -91,10 +91,17 @@ Copy-Item ".\index.html" $FONT_WEBVIEW_INDEX
 foreach ($_font in $FONT) {
   $font_family = ($_font | Split-Path -Leaf).replace('.otf', '-OTF').replace('.ttf', '-TTF')
   $font_url = $_font.replace($Directory, '').replace('\', '/').substring(1)
+  
   ("@font-face{font-family:`"$font_family`";src:url(`"$font_url`");}") | 
   Out-File $FONT_WEBVIEW_CSS -Append -Encoding ascii
-  ("<option value=`"$font_family`">$font_family</option>") | 
-  Out-File $FONT_WEBVIEW_INDEX -Append  -Encoding ascii
+  
+  $font_family_space = $font_family.Replace(" ", "-")
+
+  ("<div class=`"typeview_TypefaceDisplay`" 
+    onmouseover=`"document.getElementById('$font_family_space').style.fontFamily='$font_family';`" 
+    onmouseout=`"document.getElementById('$font_family_space').style.fontFamily='';`">
+    <div id=`"$font_family_space`" class=`"typeview_Typeface`">$font_family</div>
+  </div>") | Out-File $FONT_WEBVIEW_INDEX -Append -Encoding ascii
 }
 
 (Get-Content ".\index_end.html") | 

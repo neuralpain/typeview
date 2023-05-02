@@ -8,17 +8,40 @@
   <title>Document</title>
   <link rel="stylesheet" href="fontcache.css">
 
+  <style>
+    #typeview_TypefaceDisplayContainer {
+      display: grid;
+      /* grid-template-columns: ; */
+    }
+
+    .typeview_TypefaceDisplay {
+      display: flex;
+      border: 1px solid black;
+      border-radius: 8px;
+      padding: 24px;
+      font-size: 24pt;
+      /* width: 100%; */
+      cursor: pointer;
+      /* height: 100px; */
+      margin: 5px 0;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+
   <script>
-    function updateFontStyle(font) { document.getElementById("sample-text-display").style.fontFamily = font.value; }
-    function updateFontSize() { document.querySelector('#sample-text-display-slider').addEventListener('input', e => document.querySelector('#sample-text-display').style.fontSize = e.target.value + 'pt'); }
+    
+
   </script>
 </head>
 
 <body style="text-align:center;">
 
-  <div class="wrapper">
-    <input style="display: block; width: 30%; height: 32px; margin: 0 auto;" id="sample-text-display-slider" type="range" min="12" max="256" value="48" id="slider" step="1"
-      onchange="updateFontSize()">
+  <input id="typeview_TypefaceSizeSlider" style="display: block; width: 20%; height: 32px; margin: 0 auto;" type="range"
+    min="12" max="64" value="24" id="slider" step="1" onchange="typeview_UpdateFontSize()">
 
-    <select onchange="updateFontStyle(this);">
+  <input type="text" id="typeview_SearchBox" onkeyup="typeview_FilterTypeface()" placeholder="Search for names..">
+
+  <div class="wrapper">
+    <div id="typeview_TypefaceDisplayContainer">
       
