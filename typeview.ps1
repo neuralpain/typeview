@@ -8,6 +8,7 @@ param(
   [Parameter(Mandatory)] [string] $Directory, 
   [switch] $Update,
   [switch] $OpenInBrowser,
+  [switch] $Install,
   [switch] $AddShortcut
 )
 
@@ -81,6 +82,29 @@ function Reset-FontCache {
   Write-Host "Done."
 }
 
+$install_location = "C:\typeview"
+function New-Shortcut {
+  param (
+    [string] $Name,
+    [string] $Target,
+    [string] $Arguments,
+    [switch] $RunPowerShell
+  )
+
+  $WshShell = New-Object -ComObject WScript.Shell
+  $Shortcut = $WshShell.CreateShortcut("$Home\Desktop\$Name.lnk")
+  
+  if ($RunPowerShell) { 
+    $Target = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
+    $Arguments = " -noexit -ExecutionPolicy Bypass -File `"$install_location\typeview.ps1`" -Directory `"$Directory`" $Arguments"
+  }
+
+  $Shortcut.TargetPath = "`"$Target`""
+  $Shortcut.Arguments = $Arguments
+  $Shortcut.WorkingDirectory = $install_location
+  $Shortcut.Save()
+}
+
 if (($Update) -or (-not(Test-Path $FONT_LIST))) { Reset-FontCache }
 
 Write-Host "==> Compiling webview... " -NoNewline
@@ -108,12 +132,21 @@ foreach ($_font in $FONT) {
 Out-File $FONT_WEBVIEW_INDEX -Append -Encoding ascii
 Write-Host "Done."
 
-if ($AddShortcut) {
+
+if ($Install) {
+  Write-Host "==> Installing to $install_location... " -NoNewline
+  Copy-Item (Get-ChildItem) $install_location -Force
+  Write-Host "Done."
+  Write-Host "==> Creating shortcuts... " -NoNewline
+  New-Shortcut -Name "Open Typeview Font Webview" -Target "$FONT_WEBVIEW_INDEX"
+  New-Shortcut -Name "Update Typeview Font Cache" -Arguments "-Update" -RunPowerShell
+  New-Shortcut -Name "Rebuild Typeview Webview" -RunPowerShell
+  Write-Host "Done."
+}
+
+elseif ($AddShortcut) {
   Write-Host "==> Creating shortcut... " -NoNewline
-  $WshShell = New-Object -comObject WScript.Shell
-  $Shortcut = $WshShell.CreateShortcut("$Home\Desktop\Open Typeview Font Webview.lnk")
-  $Shortcut.TargetPath = "$FONT_WEBVIEW_INDEX"
-  $Shortcut.Save()
+  New-Shortcut -Name "Open Typeview Font Webview" -Target "$FONT_WEBVIEW_INDEX"
   Write-Host "Done."
 }
 
