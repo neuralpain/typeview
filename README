@@ -4,14 +4,21 @@
 2. run `.\typeview.ps1 path\to\font\repository`
 3. wait for cache and compile
 
+* cache will build on first run in selected directory
+* use "Start Typeview.lnk" to run without init terminal
 --
 
 Switches:
 
-`-Update` - rebuild font cache (cache will build on first run in selected directory)
-`-Install` - copy typeview to C:\typeview and add shortcuts
-`-AddShortcut` - add a shortcut to the desktop for compiled webview
-`-OpenInBrowser` - open after compile is finished
+-Directory - is mandatory
+[-Update] - rebuild font cache
+[-Install] - copy typeview to C:\typeview and add shortcuts
+[-AddShortcut] - add a shortcut to the desktop for compiled webview
+[-OpenInBrowser] - open after compile is finished
+[-Uninstall] - remove typeview from install location
+[-InstallLocation <Directory>] - change install location (default is "C:\"; use with -Install)
+[-ShortcutLocation <Directory>] - change install location (default is desktop)
+
 
 .\typeview.ps1 path\to\font\repository -Install -Update -OpenInBrowser
 
@@ -38,6 +45,7 @@ Open manually:
 
 Changelog:
 
+v0.6.0 - optimization and improvememnts
 v0.5.0 - add shortcuts
 v0.4.0 - add filter
 v0.3.0 - add switches

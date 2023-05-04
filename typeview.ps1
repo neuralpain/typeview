@@ -1,5 +1,5 @@
 <#
-  typeview.ps1, Version 0.4.0
+  typeview.ps1, Version 0.6.0
   Copyright (c) 2023, neuralpain
   View your local typefaces in the browser
 #>
@@ -9,59 +9,87 @@ param(
   [switch] $Update,
   [switch] $OpenInBrowser,
   [switch] $Install,
-  [switch] $AddShortcut
+  [string] $InstallLocation = "C:\",
+  [switch] $Uninstall,
+  [switch] $AddShortcut,
+  [string] $ShortcutLocation = "$Home\Desktop"
 )
 
-# if (-not(Test-Path "$Directory\_fontwebview")) { mkdir "$Directory\_fontwebview" }
-
-# clean up slash endings
-while (($Directory.Substring($Directory.Length - 1) -eq "\") -or ($Directory.Substring($Directory.Length - 1) -eq "/")) {
-  $Directory = $Directory.Substring(0, $Directory.Length - 1)
+function Remove-DirectorySlash {
+  param ( [string] $Directory )
+  
+  $Directory = $Directory.Replace("typeview", "")
+  
+  while (($Directory.Substring($Directory.Length - 1) -eq "\") -or ($Directory.Substring($Directory.Length - 1) -eq "/")) { 
+    $Directory = $Directory.Substring(0, $Directory.Length - 1) # $Directory.Remove($Directory.Length - 1, 1)
+  }
+  
+  return $Directory 
 }
 
-if (-not(Test-Path $Directory)) { Write-Host "typeview: " -NoNewline; Write-Host "Directory does not exist." -ForegroundColor DarkRed; exit }
+function Test-DirectoryLocation {
+  param ( [string] $Directory )
+  
+  if (-not(Test-Path $Directory)) {
+    Write-Host "typeview: " -NoNewline
+    Write-Host "`"$Directory`" does not exist." -ForegroundColor DarkRed
+    exit
+  }
+}
 
-# $FONT_WEBVIEW = "$Directory\_fontwebview" # Re: `Clear-FontCache`
-$FONT_WEBVIEW_INDEX = "$Directory\index.html"
-$FONT_WEBVIEW_CSS = "$Directory\fontcache.css"
-# $FDIR_LIST = "$Directory\DIRLIST.CSV" 
-$FONT_LIST = "$Directory\FONTLIST.CSV"
+
+$Directory = (Remove-DirectorySlash $Directory)
+$ShortcutLocation = (Remove-DirectorySlash $ShortcutLocation)
+$InstallLocation = (Remove-DirectorySlash $InstallLocation)
+Test-DirectoryLocation $Directory
+Test-DirectoryLocation $ShortcutLocation
+Test-DirectoryLocation $InstallLocation
+$InstallLocation = "$InstallLocation\typeview"
+
+$TV_WEBVIEW = "$Directory\_fontwebview"
+$TV_WEBVIEW_INDEX = "$Directory\index.html"
+$TV_WEBVIEW_CSS = "$TV_WEBVIEW\fontcache.css"
+$FONT_LIST = "$TV_WEBVIEW\FONTLIST.CSV"
+
+$TV_SHORTCUT_OPEN = "Open Typeview Font Webview.lnk"
+$TV_SHORTCUT_UPDATE = "Update Typeview Font Cache.lnk"
+$TV_SHORTCUT_REBUILD = "Rebuild Typeview Webview.lnk"
 
 Write-Host;
 
 function Remove-Typeview {
-  if ((Test-Path $FDIR_LIST) -or (Test-Path $FONT_LIST) -or (Test-Path $FONT_WEBVIEW_INDEX) -or (Test-Path $FONT_WEBVIEW_CSS)) {
-    # Remove-Item $FDIR_LIST >$null 2>&1
-    Remove-Item $FONT_LIST >$null 2>&1
-    Remove-Item $FONT_WEBVIEW_INDEX >$null 2>&1
-    Remove-Item $FONT_WEBVIEW_CSS >$null 2>&1
+  
+  if ((Test-Path $TV_WEBVIEW_INDEX) -or (Test-Path $TV_WEBVIEW)) {
+    Write-Host "==> Removing typeview... " -NoNewline
+    Remove-Item $TV_WEBVIEW_INDEX -Force >$null 2>&1
+    Remove-Item $TV_WEBVIEW -Force -Recurse >$null 2>&1
+    Remove-Item $InstallLocation -Force -Recurse >$null 2>&1
+    if (Test-Path "$ShortcutLocation\$TV_SHORTCUT_OPEN") { Remove-Item "$ShortcutLocation\$TV_SHORTCUT_OPEN" >$null 2>&1 }
+    if (Test-Path "$ShortcutLocation\$TV_SHORTCUT_UPDATE") { Remove-Item "$ShortcutLocation\$TV_SHORTCUT_UPDATE" >$null 2>&1 }
+    if (Test-Path "$ShortcutLocation\$TV_SHORTCUT_REBUILD") { Remove-Item "$ShortcutLocation\$TV_SHORTCUT_REBUILD" >$null 2>&1 }
+    Write-Host "Done.`n"
+  }
+  else {
+    Write-Host "typeview: " -NoNewline
+    Write-Host "typeview is not installed.`n" -ForegroundColor DarkRed
   }
 }
 
 function RemoveQuotesFromPath {
   param ( $File, $TableName )
-  $content = Get-Content -Path $File
+  $content = (Get-Content -Path $File)
   $content | Select-Object -Skip 1 | 
   ForEach-Object { $_ -replace '"' } | 
   Set-Content -Path $File
 }
 
-function Reset-FontStylesheet {
-  if (Test-Path $FONT_WEBVIEW_CSS) { Clear-Content $FONT_WEBVIEW_CSS } 
-}
-
-function Get-FontList {
-  return (Get-Content -Path $FONT_LIST)
-}
+function Reset-FontStylesheet { if (Test-Path $TV_WEBVIEW_CSS) { Clear-Content $TV_WEBVIEW_CSS } }
+function Get-FontList { return (Get-Content -Path $FONT_LIST) }
 
 function Reset-FontCache {
-
-  # if (Test-Path $FDIR_LIST) { Clear-Content $FDIR_LIST }
+  if (-not(Test-Path $TV_WEBVIEW)) { mkdir $TV_WEBVIEW >$null 2>&1 }
   if (Test-Path $FONT_LIST) { Clear-Content $FONT_LIST }
-  
-  <# removed to resolve issues when editing with live server
-    if (Test-Path $FONT_WEBVIEW_INDEX) { Clear-Content $FONT_WEBVIEW_INDEX }
-  #>
+  if (Test-Path $TV_WEBVIEW_INDEX) { Clear-Content $TV_WEBVIEW_INDEX }
 
   Write-Host "==> Scanning directories... " -NoNewline
   Get-ChildItem -Path $Directory -Recurse -Include *.otf, *.ttf | 
@@ -73,16 +101,17 @@ function Reset-FontCache {
   $DIR = Get-FontList
   Clear-Content $FONT_LIST
   Write-Host "==> Collecting fonts... " -NoNewline
+  
   foreach ($_path in $DIR) { 
     Get-ChildItem -Path "$_path" -Recurse -Include *.otf, *.ttf | 
     Select-Object FullName | 
     Export-Csv -Path $FONT_LIST -Append -NoTypeInformation 
   }
+
   RemoveQuotesFromPath -File $FONT_LIST
   Write-Host "Done."
 }
 
-$install_location = "C:\typeview"
 function New-Shortcut {
   param (
     [string] $Name,
@@ -92,70 +121,81 @@ function New-Shortcut {
   )
 
   $WshShell = New-Object -ComObject WScript.Shell
-  $Shortcut = $WshShell.CreateShortcut("$Home\Desktop\$Name.lnk")
+  $Shortcut = $WshShell.CreateShortcut("$ShortcutLocation\$Name")
   
   if ($RunPowerShell) { 
     $Target = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-    $Arguments = " -noexit -ExecutionPolicy Bypass -File `"$install_location\typeview.ps1`" -Directory `"$Directory`" $Arguments"
+    $Arguments = " -noexit -ExecutionPolicy Bypass -File `"$InstallLocation\typeview.ps1`" -Directory `"$Directory`" $Arguments"
   }
 
   $Shortcut.TargetPath = "`"$Target`""
   $Shortcut.Arguments = $Arguments
-  $Shortcut.WorkingDirectory = $install_location
+  $Shortcut.WorkingDirectory = $InstallLocation
   $Shortcut.Save()
 }
 
-if (($Update) -or (-not(Test-Path $FONT_LIST))) { Reset-FontCache }
-
-Write-Host "==> Compiling webview... " -NoNewline
-Reset-FontStylesheet
-$FONT = Get-FontList
-Copy-Item ".\index.html" $FONT_WEBVIEW_INDEX
-
-foreach ($_font in $FONT) {
-  $font_family = ($_font | Split-Path -Leaf).replace('.otf', '-OTF').replace('.ttf', '-TTF')
-  $font_url = $_font.replace($Directory, '').replace('\', '/').substring(1)
-  
-  ("@font-face{font-family:`"$font_family`";src:url(`"$font_url`");}") | 
-  Out-File $FONT_WEBVIEW_CSS -Append -Encoding ascii
-  
-  $font_family_space = $font_family.Replace(" ", "-")
-
-  ("<div class=`"typeview_TypefaceDisplay`" 
-    onmouseover=`"document.getElementById('$font_family_space').style.fontFamily='$font_family';`" 
-    onmouseout=`"document.getElementById('$font_family_space').style.fontFamily='';`">
-    <div id=`"$font_family_space`" class=`"typeview_Typeface`">$font_family</div>
-  </div>") | Out-File $FONT_WEBVIEW_INDEX -Append -Encoding ascii
-}
-
-(Get-Content ".\index_end.html") | 
-Out-File $FONT_WEBVIEW_INDEX -Append -Encoding ascii
-Write-Host "Done."
-
-
-if ($Install) {
-  Write-Host "==> Installing to $install_location... " -NoNewline
-  Copy-Item (Get-ChildItem) $install_location -Force
+function Invoke-Install {
+  Write-Host "==> Installing... " -NoNewline
+  Copy-Item (Get-ChildItem) $InstallLocation -Force
   Write-Host "Done."
   Write-Host "==> Creating shortcuts... " -NoNewline
-  New-Shortcut -Name "Open Typeview Font Webview" -Target "$FONT_WEBVIEW_INDEX"
-  New-Shortcut -Name "Update Typeview Font Cache" -Arguments "-Update" -RunPowerShell
-  New-Shortcut -Name "Rebuild Typeview Webview" -RunPowerShell
+  New-Shortcut -Name $TV_SHORTCUT_OPEN -Target "$TV_WEBVIEW_INDEX"
+  New-Shortcut -Name $TV_SHORTCUT_UPDATE -Arguments "-Update" -RunPowerShell
+  New-Shortcut -Name $TV_SHORTCUT_REBUILD -RunPowerShell
   Write-Host "Done."
 }
 
-elseif ($AddShortcut) {
+function Invoke-InstallShortcut {
   Write-Host "==> Creating shortcut... " -NoNewline
-  New-Shortcut -Name "Open Typeview Font Webview" -Target "$FONT_WEBVIEW_INDEX"
+  New-Shortcut -Name $TV_SHORTCUT_OPEN -Target "$TV_WEBVIEW_INDEX"
   Write-Host "Done."
 }
 
-Write-Host "`nWebview location: " -NoNewline; 
-Write-Host "$FONT_WEBVIEW_INDEX`n" -ForegroundColor DarkCyan
+function New-CreateWebview {
+  Write-Host "==> Compiling webview... " -NoNewline
+  Reset-FontStylesheet
+  $FONT = (Get-FontList)
+  Copy-Item ".\index.html" $TV_WEBVIEW_INDEX
+
+  foreach ($_font in $FONT) {
+    $font_family = ($_font | Split-Path -Leaf).replace('.otf', '-OTF').replace('.ttf', '-TTF')
+    $font_url = $_font.replace($Directory, '').replace('\', '/').substring(1)
+    
+    ("@font-face{font-family:`"$font_family`";src:url(`"../$font_url`");}") | 
+    Out-File $TV_WEBVIEW_CSS -Append -Encoding ascii
+    
+    $font_family_space = $font_family.Replace(" ", "-")
+
+    ("<div class=`"typeview_TypefaceDisplay`" 
+      onmouseover=`"document.getElementById('$font_family_space').style.fontFamily='$font_family';`" 
+      onmouseout=`"document.getElementById('$font_family_space').style.fontFamily='';`">
+      <div id=`"$font_family_space`" class=`"typeview_Typeface`">$font_family</div>
+    </div>") | Out-File $TV_WEBVIEW_INDEX -Append -Encoding ascii
+  }
+
+  (Get-Content ".\index_end.html") | 
+  Out-File $TV_WEBVIEW_INDEX -Append -Encoding ascii
+  Write-Host "Done."
+
+  if ($Install) { 
+    Invoke-Install 
+    Write-Host "`nInstall location: " -NoNewline
+    Write-Host "$InstallLocation" -ForegroundColor DarkCyan
+  }
+  elseif ($AddShortcut) { Invoke-InstallShortcut }
+
+  Write-Host "`nWebview location: " -NoNewline
+  Write-Host "$TV_WEBVIEW_INDEX" -ForegroundColor DarkCyan
+}
+
+if ($Uninstall) { Remove-Typeview; exit }
+if (($Update) -or (-not(Test-Path $TV_WEBVIEW))) { Reset-FontCache }
+
+New-CreateWebview
 
 if ($OpenInBrowser) {
-  Write-Host "==> Opening in default browser...`n"
-  Start-Process $FONT_WEBVIEW_INDEX
+  Write-Host "`n==> Opening in default browser..."
+  Start-Process $TV_WEBVIEW_INDEX
 }
 
-exit
+Write-Host; exit
