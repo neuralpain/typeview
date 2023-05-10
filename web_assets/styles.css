@@ -1,0 +1,127 @@
+:root {
+  --thumb-size: 24px;
+  --grid-gap: 24px;
+  --radius-round: 25px;
+}
+
+body {
+  width: clamp(600px, 80%, 800px);
+  margin: 0 auto;
+}
+
+.font-size-128 { font-size: 128pt !important; }
+.font-size-96 { font-size: 96pt !important; }
+.font-size-84 { font-size: 84pt !important; }
+.font-size-72 { font-size: 72pt !important; }
+.font-size-64 { font-size: 64pt !important; }
+.font-size-40 { font-size: 40pt !important; }
+.font-size-32 { font-size: 32pt !important; }
+.font-size-24 { font-size: 24pt !important; }
+.font-size-18 { font-size: 18pt !important; }
+.font-size-16 { font-size: 16pt !important; }
+.font-size-14 { font-size: 14pt !important; }
+.font-size-12 { font-size: 12pt !important; }
+.font-size-11 { font-size: 11pt !important; }
+.font-size-9 { font-size: 9pt !important; }
+
+#typeview_TypefaceDisplayContainer {
+  display: grid;
+  gap: 8px;
+}
+
+.typeview_Typeface {
+  display: flex;
+  border: 1px dashed black;
+  border-radius: var(--radius-round);
+  padding: 24px;
+  font-size: 24pt;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  /* height: 100px; */
+  /* margin: 5px 0; */
+  /* width: 100%; */
+}
+
+#typeview_InputContainer {
+  display: grid;
+  grid-template-columns: auto 20%;
+  gap: var(--grid-gap);
+  margin: 24px 0;
+  align-items: center;
+}
+
+#typeview_SearchBox {
+  border-radius: var(--radius-round);
+  border: 1px dashed black;
+  height: 2em;
+  font-size: 1em;
+  padding: 0 12px
+}
+
+
+.font-size-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 10px;
+  border-radius: var(--radius-round);
+  border: 1px dashed black;
+  outline: none;
+}
+
+.font-size-slider:hover {
+  opacity: 1;
+}
+
+.font-size-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: var(--thumb-size);
+  height: var(--thumb-size);
+  border: 0;
+  background: url('tv-font-resize.svg');
+  cursor: pointer;
+}
+
+.font-size-slider::-moz-range-thumb {
+  width: var(--thumb-size);
+  height: var(--thumb-size);
+  border: 0;
+  background: url('tv-font-resize.svg');
+  cursor: pointer;
+}
+
+
+/****************
+ SPECIMEN 
+ ****************/
+
+#typeview_SpecimenContainer {
+  display: grid;
+  gap: var(--grid-gap);
+  /* grid-template-columns: 1fr 1fr; */
+  /* width: 50%; */
+}
+
+.typeview-specimen p { word-break: break-all; }
+
+.typeview-specimen {
+  border-radius: var(--radius-round);
+  border: 1px dashed black;
+  padding: 24px;
+}
+
+div#specimen-size,
+div#specimen-character {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px;
+}
+
+.specimen-size-container {
+  display: grid;
+  grid-template-columns: 64px auto;
+  gap: 24px;
+  justify-items: end;
+}

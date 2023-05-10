@@ -1,5 +1,5 @@
 <#
-  typeview.ps1, Version 0.6.0
+  typeview.ps1, Version 0.7.0
   Copyright (c) 2023, neuralpain
   View your local typefaces in the browser
 #>
@@ -46,19 +46,20 @@ Test-DirectoryLocation $ShortcutLocation
 Test-DirectoryLocation $InstallLocation
 $InstallLocation = "$InstallLocation\typeview"
 
+$TV_WEBVIEW_SRC = ".\web_assets"
 $TV_WEBVIEW = "$Directory\_fontwebview"
 $TV_WEBVIEW_INDEX = "$Directory\index.html"
-$TV_WEBVIEW_CSS = "$TV_WEBVIEW\fontcache.css"
+$TV_WEBVIEW_FONTCACHE = "$TV_WEBVIEW\fontcache.css"
+$TV_WEBVIEW_JS = "$TV_WEBVIEW\typefaces.js"
 $FONT_LIST = "$TV_WEBVIEW\FONTLIST.CSV"
 
 $TV_SHORTCUT_OPEN = "Open Typeview Font Webview.lnk"
 $TV_SHORTCUT_UPDATE = "Update Typeview Font Cache.lnk"
 $TV_SHORTCUT_REBUILD = "Rebuild Typeview Webview.lnk"
 
-Write-Host;
+Write-Host
 
 function Remove-Typeview {
-  
   if ((Test-Path $TV_WEBVIEW_INDEX) -or (Test-Path $TV_WEBVIEW)) {
     Write-Host "==> Removing typeview... " -NoNewline
     Remove-Item $TV_WEBVIEW_INDEX -Force >$null 2>&1
@@ -83,7 +84,7 @@ function RemoveQuotesFromPath {
   Set-Content -Path $File
 }
 
-function Reset-FontStylesheet { if (Test-Path $TV_WEBVIEW_CSS) { Clear-Content $TV_WEBVIEW_CSS } }
+function Reset-FontStylesheet { if (Test-Path $TV_WEBVIEW_FONTCACHE) { Clear-Content $TV_WEBVIEW_FONTCACHE } }
 function Get-FontList { return (Get-Content -Path $FONT_LIST) }
 
 function Reset-FontCache {
@@ -135,6 +136,7 @@ function New-Shortcut {
 }
 
 function Invoke-Install {
+  if (Test-Path $InstallLocation) { Remove-Item $InstallLocation -Force -Recurse >$null 2>&1 }
   Write-Host "==> Installing... " -NoNewline
   Copy-Item (Get-ChildItem) $InstallLocation -Force
   Write-Host "Done."
@@ -152,31 +154,36 @@ function Invoke-InstallShortcut {
 }
 
 function New-CreateWebview {
-  Write-Host "==> Compiling webview... " -NoNewline
   Reset-FontStylesheet
+  Write-Host "==> Compiling webview... " -NoNewline
+  Copy-Item ".\index.html" $TV_WEBVIEW_INDEX          # initialize `index.html`
+  $sources = (Get-ChildItem $TV_WEBVIEW_SRC)
+  foreach ($src in $sources) { Copy-Item "$TV_WEBVIEW_SRC\$src" $TV_WEBVIEW }          # copy assets to `_fontview`
   $FONT = (Get-FontList)
-  Copy-Item ".\index.html" $TV_WEBVIEW_INDEX
-
+  
   foreach ($_font in $FONT) {
     $font_family = ($_font | Split-Path -Leaf).replace('.otf', '-OTF').replace('.ttf', '-TTF')
     $font_url = $_font.replace($Directory, '').replace('\', '/').substring(1)
     
+    <# output to `fontcache.css` #>
     ("@font-face{font-family:`"$font_family`";src:url(`"../$font_url`");}") | 
-    Out-File $TV_WEBVIEW_CSS -Append -Encoding ascii
-    
+    Out-File $TV_WEBVIEW_FONTCACHE -Append -Encoding ascii
+
+    <# output to `index.html` #>
     $font_family_space = $font_family.Replace(" ", "-")
-
-    ("<div class=`"typeview_TypefaceDisplay`" 
-      onmouseover=`"document.getElementById('$font_family_space').style.fontFamily='$font_family';`" 
-      onmouseout=`"document.getElementById('$font_family_space').style.fontFamily='';`">
-      <div id=`"$font_family_space`" class=`"typeview_Typeface`">$font_family</div>
-    </div>") | Out-File $TV_WEBVIEW_INDEX -Append -Encoding ascii
+    ("{name: `"$font_family_space`", literal: `"$font_family`"},") | 
+    Out-File $TV_WEBVIEW_JS -Append -Encoding ascii
   }
+  
+  # close json object
+  ("],};") | Out-File $TV_WEBVIEW_JS -Append -Encoding ascii
 
-  (Get-Content ".\index_end.html") | 
-  Out-File $TV_WEBVIEW_INDEX -Append -Encoding ascii
+  # add footer and javascript
+  # (Get-Content ".\index_end.html") | 
+  # Out-File $TV_WEBVIEW_INDEX -Append -Encoding ascii
+  
   Write-Host "Done."
-
+  
   if ($Install) { 
     Invoke-Install 
     Write-Host "`nInstall location: " -NoNewline

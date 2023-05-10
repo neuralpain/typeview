@@ -6,6 +6,8 @@
 
 * cache will build on first run in selected directory
 * use "Start Typeview.lnk" to run without init terminal
+* run from terminal with `powershell -ExecutionPolicy Bypass -File "path\to\typeview.ps1" -Directory "path\to\font\repository"` and enter the directory location you want to process and other switches
+
 --
 
 Switches:
@@ -20,7 +22,7 @@ Switches:
 [-ShortcutLocation <Directory>] - change install location (default is desktop)
 
 
-.\typeview.ps1 path\to\font\repository -Install -Update -OpenInBrowser
+.\typeview.ps1 path\to\font\repository -Update -Install -OpenInBrowser
 
 --
 
@@ -45,6 +47,7 @@ Open manually:
 
 Changelog:
 
+v0.7.0 - add type specimen 
 v0.6.0 - optimization and improvememnts
 v0.5.0 - add shortcuts
 v0.4.0 - add filter

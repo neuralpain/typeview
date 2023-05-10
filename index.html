@@ -12,37 +12,166 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
   <link rel="stylesheet" href="_fontwebview/fontcache.css">
-
-  <style>
-    #typeview_TypefaceDisplayContainer {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .typeview_TypefaceDisplay {
-      display: flex;
-      border: 1px solid black;
-      border-radius: 8px;
-      padding: 24px;
-      font-size: 24pt;
-      /* width: 100%; */
-      cursor: pointer;
-      /* height: 100px; */
-      /* margin: 5px 0; */
-      align-items: center;
-      justify-content: center;
-    }
-  </style>
+  <link rel="stylesheet" href="_fontwebview/styles.css">
   <script>console.log("Webpage compiled by typeview: \"https://github.com/neuralpain/typeview\"")</script>
 </head>
 
-<body style="text-align:center;">
+<body>
 
-  <input id="typeview_TypefaceSizeSlider" style="display: block; width: 20%; height: 32px; margin: 0 auto;" type="range"
-    min="12" max="64" value="24" id="slider" step="1" onchange="typeview_UpdateFontSize()">
+  <div id="typeview_InputContainer">
+    <input id="typeview_SearchBox" type="text" onkeyup="typeview_FilterTypeface()"
+      placeholder="Filter through your fonts...">
+    <input id="typeview_TypefaceSizeSlider" class="font-size-slider" type="range" min="12" max="64" value="24"
+      id="slider" step="1" onchange="typeview_UpdateFontSize()">
+  </div>
 
-  <input type="text" id="typeview_SearchBox" onkeyup="typeview_FilterTypeface()" placeholder="Search for names..">
+  <!-- SPECIMEN -->
 
-  <div class="wrapper">
-    <div id="typeview_TypefaceDisplayContainer">
+  <div id="typeview_SpecimenContainer">
+    <div class="typeview-specimen">
+      <h4 class="specimen-label">Paragraph</h4>
+      <div id="specimen-size">
+        <div class="specimen-size-container font-size-24">
+          <div class="specimen-size-label">24pt</div>
+          <div>Typographers have developed a comprehensive vocabulary for describing the many
+            aspects of
+            typefaces and typography. Some vocabulary applies only to a subset of all scripts. Serifs, for example, are
+            a
+            purely decorative characteristic of typefaces used for European scripts, whereas the glyphs used in Arabic
+            or
+            East Asian scripts have characteristics (such as stroke width) that may be similar in some respects but
+            cannot
+            reasonably be called serifs and may not be purely decorative.
+          </div>
+        </div>
+
+        <div class="specimen-size-container font-size-18">
+          <div class="specimen-size-label">18pt</div>
+          <div>Typefaces can be divided into two main categories: serif and sans serif. Serifs
+            comprise the small features at the end of strokes within letters. The printing industry refers to typeface
+            without serifs as sans serif (from French sans, meaning without), or as grotesque (or, in German, grotesk).
+          </div>
+        </div>
+
+        <div class="specimen-size-container font-size-16">
+          <div class="specimen-size-label">16pt</div>
+          <div>Great variety exists among both serif and sans serif typefaces. Both groups contain
+            faces designed for setting large amounts of body text, and others intended primarily as decorative. The
+            presence or absence of serifs represents only one of many factors to consider when choosing a typeface.
+          </div>
+        </div>
+
+        <div class="specimen-size-container font-size-11">
+          <div class="specimen-size-label">11pt</div>
+          <div>A proportional typeface contains glyphs of varying widths, while a monospaced
+            (non-proportional or fixed-width) typeface uses a single standard width for all glyphs in the font.
+            Duospaced
+            fonts are similar to monospaced fonts, but characters can also be two character widths instead of a single
+            character width.</div>
+        </div>
+
+        <div class="specimen-size-container font-size-9">
+          <div class="specimen-size-label">9pt</div>
+          <div>Many people generally find proportional typefaces nicer-looking and easier to read,
+            and
+            thus they appear more commonly in professionally published printed material. For the same reason, GUI
+            computer
+            applications (such as word processors and web browsers) typically use proportional fonts. However, many
+            proportional fonts contain fixed-width (tabular) figures so that columns of numbers stay aligned.</div>
+        </div>
+      </div>
+    </div>
+    <div class="typeview-specimen">
+      <h4 class="specimen-label">Basic characters</h4>
+      <div id="specimen-character" class="font-size-32">
+        <div class="character">A</div>
+        <div class="character">B</div>
+        <div class="character">C</div>
+        <div class="character">D</div>
+        <div class="character">E</div>
+        <div class="character">F</div>
+        <div class="character">G</div>
+        <div class="character">H</div>
+        <div class="character">I</div>
+        <div class="character">J</div>
+        <div class="character">K</div>
+        <div class="character">L</div>
+        <div class="character">M</div>
+        <div class="character">N</div>
+        <div class="character">O</div>
+        <div class="character">P</div>
+        <div class="character">Q</div>
+        <div class="character">R</div>
+        <div class="character">S</div>
+        <div class="character">T</div>
+        <div class="character">U</div>
+        <div class="character">V</div>
+        <div class="character">W</div>
+        <div class="character">X</div>
+        <div class="character">Y</div>
+        <div class="character">Z</div>
+        <div class="character">a</div>
+        <div class="character">b</div>
+        <div class="character">c</div>
+        <div class="character">d</div>
+        <div class="character">e</div>
+        <div class="character">f</div>
+        <div class="character">g</div>
+        <div class="character">h</div>
+        <div class="character">i</div>
+        <div class="character">j</div>
+        <div class="character">k</div>
+        <div class="character">l</div>
+        <div class="character">m</div>
+        <div class="character">n</div>
+        <div class="character">o</div>
+        <div class="character">p</div>
+        <div class="character">q</div>
+        <div class="character">r</div>
+        <div class="character">s</div>
+        <div class="character">t</div>
+        <div class="character">u</div>
+        <div class="character">v</div>
+        <div class="character">w</div>
+        <div class="character">x</div>
+        <div class="character">y</div>
+        <div class="character">z</div>
+        <div class="character">&</div>
+        <div class="character">@</div>
+        <div class="character">.</div>
+        <div class="character">,</div>
+        <div class="character">?</div>
+        <div class="character">!</div>
+        <div class="character">’</div>
+        <div class="character">“</div>
+        <div class="character">”</div>
+        <div class="character">(</div>
+        <div class="character">)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- END SPECIMEN -->
+
+  <div class="wrapper" style="margin-top: 24px;">
+    <div id="typeview_TypefaceDisplayContainer"></div>
+  </div>
+
+  <footer style="margin: 12px auto; font-size: 16px;">Compiled by <a
+      href="https://github.com/neuralpain/typeview">Typeview</a></footer>
+
+</body>
+
+<script src="_fontwebview/typefaces.js"></script>
+<script src="_fontwebview/script.js"></script>
+
+<script>
+  typeview_InvokeListOfNames()
+</script>
+
+</html>
+
+<!-- 
+  Webpage compiled by typeview
+  https://github.com/neuralpain/typeview
+-->
