@@ -1,12 +1,11 @@
 ### typeview — Preview typefaces
 
-1. clone repository
-2. run `.\typeview.exe path\to\font\repository`
+1. download latest x64 release
+2. extract & run `.\typeview.exe path\to\font\repository`
 3. wait for cache and compile
 
 * cache will build on first run in selected directory
-* use "Start Typeview.lnk" to run without init terminal
-* run from terminal with `"path\to\typeview.exe" -Directory "path\to\font\repository"` and enter the directory location you want to process and other switches
+* run from terminal with `"path\to\typeview.exe" -Directory "path\to\font\repository"` and other switches you want to modify
 
 --
 
@@ -21,8 +20,8 @@ Switches:
 [-InstallLocation <Directory>] - change install location (default is "C:\"; use with -Install)
 [-ShortcutLocation <Directory>] - change install location (default is desktop)
 
-
-.\typeview.ps1 path\to\font\repository -Update -Install -OpenInBrowser
+Example: 
+.\typeview.exe path\to\font\repository -Install -OpenInBrowser
 
 --
 
