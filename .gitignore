@@ -1,2 +1,9 @@
 node_modules
 package*.json
+
+bat2exe
+ps2exe
+
+dist
+
+*.zip

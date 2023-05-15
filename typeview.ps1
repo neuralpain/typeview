@@ -1,5 +1,5 @@
 <#
-  typeview.ps1, Version 0.7.0
+  typeview.ps1, Version 0.8.0
   Copyright (c) 2023, neuralpain
   View your local typefaces in the browser
 #>
@@ -36,7 +36,6 @@ function Test-DirectoryLocation {
     exit
   }
 }
-
 
 $Directory = (Remove-DirectorySlash $Directory)
 $ShortcutLocation = (Remove-DirectorySlash $ShortcutLocation)
@@ -126,7 +125,8 @@ function New-Shortcut {
   
   if ($RunPowerShell) { 
     $Target = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-    $Arguments = " -noexit -ExecutionPolicy Bypass -File `"$InstallLocation\typeview.ps1`" -Directory `"$Directory`" $Arguments"
+    # $Arguments = "-noexit -ExecutionPolicy Bypass -File `"$InstallLocation\typeview.ps1`" -Directory `"$Directory`" $Arguments"
+    $Arguments = "`"$InstallLocation\typeview.exe`" -Directory `"$Directory`" $Arguments; Pause"
   }
 
   $Shortcut.TargetPath = "`"$Target`""
@@ -138,7 +138,12 @@ function New-Shortcut {
 function Invoke-Install {
   if (Test-Path $InstallLocation) { Remove-Item $InstallLocation -Force -Recurse >$null 2>&1 }
   Write-Host "==> Installing... " -NoNewline
-  Copy-Item (Get-ChildItem) $InstallLocation -Force
+
+  mkdir $InstallLocation\web_assets -Force >$null 2>&1
+  Copy-Item (Get-ChildItem) $InstallLocation >$null 2>&1
+
+  foreach ($item in (Get-ChildItem .\web_assets\*)) { Copy-Item $item $InstallLocation\web_assets }
+
   Write-Host "Done."
   Write-Host "==> Creating shortcuts... " -NoNewline
   New-Shortcut -Name $TV_SHORTCUT_OPEN -Target "$TV_WEBVIEW_INDEX"
