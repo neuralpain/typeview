@@ -1,5 +1,9 @@
 ### typeview — Preview typefaces
 
+Project is archived @v0.8.0. Consider using FontBase → https://fontba.se
+
+--
+
 1. download latest x64 release
 2. extract & run `.\typeview.exe path\to\font\repository`
 3. wait for cache and compile
